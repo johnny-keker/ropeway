@@ -9,6 +9,9 @@ with open("secret", "r") as f:
 with open("dialogs.json", "r") as f:
     messages = json.load(f)
 
+with open("state.json", "r") as f:
+    cabe = json.load(f)
+
 print("<...ropeway.initialized...>")
 vk = vk_api.VkApi(token=api_key)
 print("<...connecting...>")
@@ -24,10 +27,13 @@ def already_registered(current_occupation, people_amount):
     return messages["already_registered"].replace("${1}", str(current_occupation)).replace("${2}", str(people_amount))
 
 PEOPLE_AMOUNT = 3
-cabe = []
 
 def write_msg(user_id, s):
     vk.method('messages.send', {'user_id': user_id, 'message': s, 'random_id':random.randint(0, 100)})
+
+def save_state():
+    with open('state.json', 'w') as f:
+        json.dump(cabe, f)
 
 def add_user_to_cabe(u_id):
     if u_id in cabe:
@@ -41,14 +47,16 @@ def add_user_to_cabe(u_id):
                 write_msg(uid, messages["start"])
             cabe.clear()
 
+def valid_message(text):
+    for pattern in messages["enter_patterns"]:
+        if pattern in text:
+            return True
+    return False
+
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-        valid_message = False
-        for pattern in messages["enter_patterns"]:
-            if pattern in event.text:
-                add_user_to_cabe(event.user_id)
-                valid_message = True
-                break
-        if not valid_message:
+        if valid_message(event.text):
+            add_user_to_cabe(event.user_id)
+        else:
             write_msg(event.user_id, messages["error"])
 
