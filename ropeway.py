@@ -49,14 +49,24 @@ def add_user_to_cabe(u_id):
 
 def valid_message(text):
     for pattern in messages["enter_patterns"]:
-        if pattern in text:
+        if pattern in text.lower():
             return True
     return False
 
-for event in longpoll.listen():
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-        if valid_message(event.text):
-            add_user_to_cabe(event.user_id)
-        else:
-            write_msg(event.user_id, messages["error"])
+def is_end_message(u_id, text):
+    return u_id in messages["admins"] and text.lower() in messages["stop_words"]
 
+def main_cycle():
+    for event in longpoll.listen():
+        if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+            if is_end_message(event.user_id, event.text):
+                print("<...enough.for.today...>")
+                save_state()
+                for uid in cabe:
+                    write_msg(uid, messages["on_closing"])
+                return
+            elif valid_message(event.text):
+                add_user_to_cabe(event.user_id)
+            else:
+                write_msg(event.user_id, messages["error"])
+main_cycle()
