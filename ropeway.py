@@ -62,6 +62,22 @@ def on_startup():
     if len(cabe) != 0:
         for uid in cabe:
             write_msg(uid, messages["on_startup"].format(ON_TIME, OFF_TIME))
+    unread_dialogs_response = vk.method('messages.getConversations', {'filter':'unread', 'group_id':181890758})
+    if unread_dialogs_response['count'] == 0:
+        return
+    unread_dialogs = []
+    for item in unread_dialogs_response['items']:
+        unread_dialogs.append([item["conversation"]["peer"]["id"], item["conversation"]["unread_count"]])
+    for dialog in unread_dialogs:
+        msgs = vk.method('messages.getHistory', {'peer_id':dialog[0], 'count':dialog[1]})['items']
+        entered = False
+        for message in msgs:
+            if valid_message(message['text']):
+                add_user_to_cabe(dialog[0])
+                entered = True
+                break
+        if not entered:
+            write_msg(dialog[0], messages["error"])
 
 def main_cycle():
     for event in longpoll.listen():
