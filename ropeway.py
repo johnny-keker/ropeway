@@ -27,6 +27,8 @@ def already_registered(current_occupation, people_amount):
     return messages["already_registered"].format(str(current_occupation), str(people_amount))
 
 PEOPLE_AMOUNT = 3
+ON_TIME = 10
+OFF_TIME = 10
 
 def write_msg(user_id, s):
     vk.method('messages.send', {'user_id': user_id, 'message': s, 'random_id':random.randint(0, 100)})
@@ -56,6 +58,11 @@ def valid_message(text):
 def is_end_message(u_id, text):
     return u_id in messages["admins"] and text.lower() in messages["stop_words"]
 
+def on_startup():
+    if len(cabe) != 0:
+        for uid in cabe:
+            write_msg(uid, messages["on_startup"].format(ON_TIME, OFF_TIME))
+
 def main_cycle():
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
@@ -69,4 +76,6 @@ def main_cycle():
                 add_user_to_cabe(event.user_id)
             else:
                 write_msg(event.user_id, messages["error"])
+
+on_startup()
 main_cycle()
