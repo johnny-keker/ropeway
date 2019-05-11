@@ -9,13 +9,13 @@ with open("secret", "r") as f:
 with open("dialogs.json", "r") as f:
     messages = json.load(f)
 
-print("Ropeway initialized...")
+print("<...ropeway.initialized...>")
 vk = vk_api.VkApi(token=api_key)
-print("Connecting...")
+print("<...connecting...>")
 vk._auth_token()
-print("Connected succesfully!\nLongpoll initializing...")
+print("<...connected.succesfully...>\n<...longpoll.initializing...>")
 longpoll = VkLongPoll(vk)
-print("Longpoll initialized!\nRopeway is running!")
+print("<...longpoll.initialized...>\n<...ropeway.is.running...>\n<...enjoy...>")
 
 def on_registration(current_occupation, people_amount):
     return messages["on_registration"].replace("${1}", str(current_occupation)).replace("${2}", str(people_amount))
