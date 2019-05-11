@@ -21,10 +21,10 @@ longpoll = VkLongPoll(vk)
 print("<...longpoll.initialized...>\n<...ropeway.is.running...>\n<...enjoy...>")
 
 def on_registration(current_occupation, people_amount):
-    return messages["on_registration"].replace("${1}", str(current_occupation)).replace("${2}", str(people_amount))
+    return messages["on_registration"].format(str(current_occupation), str(people_amount))
 
 def already_registered(current_occupation, people_amount):
-    return messages["already_registered"].replace("${1}", str(current_occupation)).replace("${2}", str(people_amount))
+    return messages["already_registered"].format(str(current_occupation), str(people_amount))
 
 PEOPLE_AMOUNT = 3
 
