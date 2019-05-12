@@ -67,31 +67,26 @@ def on_startup():
         return
     unread_dialogs = []
     for item in unread_dialogs_response['items']:
-        unread_dialogs.append([item["conversation"]["peer"]["id"], item["conversation"]["unread_count"]])
+        unread_dialogs.append(item["conversation"]["peer"]["id"])
     for dialog in unread_dialogs:
-        msgs = vk.method('messages.getHistory', {'peer_id':dialog[0], 'count':dialog[1]})['items']
-        entered = False
-        for message in msgs:
-            if valid_message(message['text']):
-                add_user_to_cabe(dialog[0])
-                entered = True
-                break
-        if not entered:
-            write_msg(dialog[0], messages["error"])
+        add_user_to_cabe(dialog)
 
 def main_cycle():
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
             if is_end_message(event.user_id, event.text):
                 print("<...enough.for.today...>")
+                write_msg(event.user_id, messages["closing_response"])
                 save_state()
                 for uid in cabe:
                     write_msg(uid, messages["on_closing"])
                 return
-            elif valid_message(event.text):
-                add_user_to_cabe(event.user_id)
             else:
-                write_msg(event.user_id, messages["error"])
+                add_user_to_cabe(event.user_id)
+            #elif valid_message(event.text):
+            #    add_user_to_cabe(event.user_id)
+            #else:
+            #    write_msg(event.user_id, messages["error"])
 
 on_startup()
 main_cycle()
